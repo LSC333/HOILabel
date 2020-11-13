@@ -51,8 +51,10 @@ class HOILabel:
         combineJSON(self.jsonPath)
 
     def action_jsonDir(self):
-        self.jsonPath = QFileDialog.getExistingDirectory(self.ui, "请选择json文件保存路径",
-                                                         r".") + '/'
+        tmpPath = QFileDialog.getExistingDirectory(self.ui, "请选择json文件保存路径",
+                                                   r".")
+        if tmpPath:
+            self.jsonPath = tmpPath+'/'
 
     def action_addRow(self):
         if not self.labels:
@@ -72,8 +74,10 @@ class HOILabel:
         self.ui.HOIList.removeRow(currentRow)
 
     def action_labelDir(self):
-        self.labelPath = QFileDialog.getExistingDirectory(self.ui, "请选择标注文件夹路径",
-                                                          r".") + '/'
+        tmpPath = QFileDialog.getExistingDirectory(self.ui, "请选择标注文件夹路径",
+                                                   r".")
+        if tmpPath:
+            self.labelPath = tmpPath+'/'
 
     def action_prev(self):
         self.index = max(self.index - 1, 0)
@@ -90,8 +94,12 @@ class HOILabel:
         self.imgShow()
 
     def action_imgDir(self):
-        self.imgPath = QFileDialog.getExistingDirectory(self.ui, "请选择图片文件夹路径",
-                                                        r".") + '/'
+
+        tmpPath = QFileDialog.getExistingDirectory(self.ui, "请选择图片文件夹路径",
+                                                   r".")
+        if tmpPath:
+            self.imgPath = tmpPath+'/'
+        # print(self.imgPath)
         self.imgList = os.listdir(self.imgPath)
         self.index = 0
         self.ui.imgList.addItems([self.imgPath + img for img in self.imgList])
