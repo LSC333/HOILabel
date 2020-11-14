@@ -6,7 +6,7 @@ from PySide2 import QtGui
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtWidgets import QFileDialog, QComboBox
 from util.img import loadImg
-from util.img import labelImg
+from util.img import labelImgVOC, labelImgYOLO
 from util.ioTXT import readTxT
 from util.ioJSON import saveJSON, combineJSON
 
@@ -32,6 +32,7 @@ class HOILabel:
         self.interaction = readTxT('dataFile/interaction.txt')
         self.classes = readTxT('dataFile/classes.txt')
         self.jsonPath = ''
+        self.voc = 1
 
         # button action
         self.ui.imgDir.clicked.connect(self.action_imgDir)
@@ -43,9 +44,17 @@ class HOILabel:
         self.ui.combine.clicked.connect(self.action_combine)
         self.ui.addRow.clicked.connect(self.action_addRow)
         self.ui.delRow.clicked.connect(self.action_delRow)
+        self.ui.voc.clicked.connect(self.action_voc)
         self.ui.quit.clicked.connect(QCoreApplication.quit)
 
         self.ui.imgList.doubleClicked.connect(self.imgListDoubleClicked)
+
+    def action_voc(self):
+        self.voc ^= 1
+        if self.voc:
+            self.ui.voc.setText('voc')
+        else:
+            self.ui.voc.setText('yolo')
 
     def action_combine(self):
         combineJSON(self.jsonPath)
@@ -54,7 +63,7 @@ class HOILabel:
         tmpPath = QFileDialog.getExistingDirectory(self.ui, "请选择json文件保存路径",
                                                    r".")
         if tmpPath:
-            self.jsonPath = tmpPath+'/'
+            self.jsonPath = tmpPath + '/'
 
     def action_addRow(self):
         if not self.labels:
@@ -77,7 +86,7 @@ class HOILabel:
         tmpPath = QFileDialog.getExistingDirectory(self.ui, "请选择标注文件夹路径",
                                                    r".")
         if tmpPath:
-            self.labelPath = tmpPath+'/'
+            self.labelPath = tmpPath + '/'
 
     def action_prev(self):
         self.index = max(self.index - 1, 0)
@@ -98,7 +107,7 @@ class HOILabel:
         tmpPath = QFileDialog.getExistingDirectory(self.ui, "请选择图片文件夹路径",
                                                    r".")
         if tmpPath:
-            self.imgPath = tmpPath+'/'
+            self.imgPath = tmpPath + '/'
         # print(self.imgPath)
         self.imgList = os.listdir(self.imgPath)
         self.index = 0
@@ -126,7 +135,9 @@ class HOILabel:
         saveJSON(self.jsonPath + self.imgList[self.index].split('.')[0] + '.json', HOIDict)
 
     def imgShow(self):
-        if not self.labelPath or not os.path.exists(self.labelPath + self.imgList[self.index].split('.')[0] + '.xml'):
+        if not self.labelPath or \
+                not (os.path.exists(self.labelPath + self.imgList[self.index].split('.')[0] + '.xml') or
+                     os.path.exists(self.labelPath + self.imgList[self.index].split('.')[0] + '.txt')):
             img = loadImg(self.imgPath + self.imgList[self.index], self.ui.img.width(),
                           self.ui.img.height())
             image = QtGui.QImage(img[:], img.shape[1], img.shape[0], img.shape[1] * 3,
@@ -134,10 +145,16 @@ class HOILabel:
             imgOut = QtGui.QPixmap(image)
             self.ui.img.setPixmap(imgOut)
         else:
-            img, self.labels = labelImg(self.imgPath + self.imgList[self.index],
-                                        self.labelPath + self.imgList[self.index].split('.')[0] + '.xml',
-                                        self.ui.img.width(),
-                                        self.ui.img.height())
+            if self.voc:
+                img, self.labels = labelImgVOC(self.imgPath + self.imgList[self.index],
+                                               self.labelPath + self.imgList[self.index].split('.')[0] + '.xml',
+                                               self.ui.img.width(),
+                                               self.ui.img.height())
+            else:
+                img, self.labels = labelImgYOLO(self.imgPath + self.imgList[self.index],
+                                                self.labelPath + self.imgList[self.index].split('.')[0] + '.txt',
+                                                self.ui.img.width(),
+                                                self.ui.img.height(), self.classes)
             image = QtGui.QImage(img[:], img.shape[1], img.shape[0], img.shape[1] * 3,
                                  QtGui.QImage.Format_RGB888)
             imgOut = QtGui.QPixmap(image)
