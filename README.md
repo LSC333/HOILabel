@@ -1,5 +1,6 @@
 ### windows10+python3.6
 
+
 HOILabel是一个HOI的标注工具，它在通过预先标注好的目标检测的标注文件进行标注，即在使用HOILabel进行HOI的标注之前需要先进行目标检测的标注，在得到(voc或yolo)格式的标注文件之后，再进行HOI的标注。
 * 安装项目依赖
 >pip install -r requirements.txt

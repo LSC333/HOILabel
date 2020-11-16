@@ -134,6 +134,7 @@ class HOILabel:
             HOIDict['annotations'].append(annotation)
         saveJSON(self.jsonPath + self.imgList[self.index].split('.')[0] + '.json', HOIDict)
 
+
     def imgShow(self):
         if not self.labelPath or \
                 not (os.path.exists(self.labelPath + self.imgList[self.index].split('.')[0] + '.xml') or
